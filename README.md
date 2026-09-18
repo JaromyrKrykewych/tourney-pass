@@ -76,8 +76,68 @@ Diseñada con un modo oscuro inmersivo que evoca el césped iluminado bajo los r
 
 ---
 
-## 🚀 Próximas Secciones de la Base del Proyecto
-- [ ] **Arquitectura Técnica & Stack** (Next.js App Router, Tailwind CSS, Supabase).
-- [ ] **Modelo de Datos** (Torneos, Participantes, Partidos, Clasificación).
-- [ ] **Formatos Soportados** (Ligas, Copas/Playoffs, Fases de Grupos).
-- [ ] **Guía de Despliegue y Configuración**.
+## 🗄️ Estructura de Base de Datos (Supabase / PostgreSQL)
+
+La base de datos está modelada de forma relacional y normalizada en PostgreSQL a través de **Supabase**, con soporte nativo para **Row Level Security (RLS)**, triggers automáticos y gestión multi-administrador por torneo.
+
+### Diagrama Entidad-Relación
+
+```mermaid
+erDiagram
+    PROFILES ||--o{ TOURNAMENTS : "crea (created_by)"
+    TOURNAMENTS ||--o{ TOURNAMENT_COLLABORATORS : "tiene administradores/invitados"
+    PROFILES ||--o{ TOURNAMENT_COLLABORATORS : "asociado (user_id)"
+    TOURNAMENTS ||--o{ PARTICIPANTS : "contiene participantes"
+    TOURNAMENTS ||--o{ TOURNAMENT_GROUPS : "fases de grupos"
+    TOURNAMENT_GROUPS ||--o{ GROUP_PARTICIPANTS : "asigna a grupo"
+    PARTICIPANTS ||--o{ GROUP_PARTICIPANTS : "pertenece a grupo"
+    TOURNAMENTS ||--o{ MATCHES : "programa partidos"
+    TOURNAMENT_GROUPS ||--o{ MATCHES : "partidos por grupo"
+    PARTICIPANTS ||--o{ MATCHES : "local / visitante"
+    MATCHES ||--o{ MATCHES : "avanza ganador (next_match_id)"
+```
+
+---
+
+### Tablas del Sistema
+
+| Tabla | Propósito | Campos Clave |
+| :--- | :--- | :--- |
+| **`profiles`** | Perfil público de usuarios registrados (sincronizado automáticamente con `auth.users`). | `id` (PK, UUID), `email`, `full_name`, `avatar_url`, `created_at` |
+| **`tournaments`** | Entidad central del torneo. Almacena formato, estado y configuraciones generales. | `id` (PK, UUID), `created_by` (FK `profiles`), `name`, `slug`, `format`, `status`, `is_public`, `settings` (JSONB) |
+| **`tournament_collaborators`** | Permite invitar a otros usuarios/correos a co-administrar un torneo. | `id` (PK, UUID), `tournament_id` (FK `tournaments`), `user_id` (FK `profiles`, nullable), `invited_email`, `role`, `status` |
+| **`participants`** | Equipos o jugadores del torneo. Admite participantes registrados o creados manualmente por el admin. | `id` (PK, UUID), `tournament_id` (FK `tournaments`), `user_id` (FK `profiles`, nullable), `name`, `seed`, `avatar_url` |
+| **`tournament_groups`** | Grupos para torneos con fase de grupos (ej. "Grupo A", "Grupo B"). | `id` (PK, UUID), `tournament_id` (FK `tournaments`), `name` |
+| **`group_participants`** | Tabla puente que asigna participantes a cada grupo. | `id` (PK, UUID), `group_id` (FK `tournament_groups`), `participant_id` (FK `participants`) |
+| **`matches`** | Partidos programados o jugados (liga, grupo o playoffs). Permite enlazar llaves de copa con `next_match_id`. | `id` (PK, UUID), `tournament_id` (FK `tournaments`), `group_id` (FK `groups`), `stage`, `round_number`, `home_participant_id`, `away_participant_id`, `home_score`, `away_score`, `home_penalties`, `away_penalties`, `status`, `next_match_id`, `bracket_position` |
+
+---
+
+### Tipos y Enums Personalizados
+
+* **`tournament_format`**: `'league'` (Liga / Todos contra todos), `'cup'` (Copa / Eliminación directa), `'group_playoff'` (Fase de grupos + PlayOff).
+* **`tournament_status`**: `'draft'` (Borrador / Configuración), `'in_progress'` (En curso), `'completed'` (Finalizado), `'archived'` (Archivado).
+* **`collaborator_role`**: `'owner'` (Dueño), `'admin'` (Administrador con permisos totales), `'editor'` (Editor de resultados y marcadores).
+* **`collaborator_status`**: `'pending'` (Invitación enviada), `'accepted'` (Aceptada), `'declined'` (Rechazada).
+* **`match_status`**: `'scheduled'` (Programado), `'live'` (En vivo), `'completed'` (Finalizado), `'cancelled'` (Cancelado), `'walkover'` (W.O.).
+
+---
+
+### Seguridad y Automatización (RLS & Triggers)
+
+1. **Row Level Security (RLS)**:
+   - **Lectura**: Cualquier usuario (incluso anónimos) puede visualizar torneos públicos, tablas, fixtures y partidos.
+   - **Creación**: Cualquier usuario autenticado puede crear sus propios torneos.
+   - **Edición / Gestión**: Controlada mediante funciones de seguridad (`is_tournament_admin` y `can_edit_tournament`), garantizando que solo el creador original o colaboradores aceptados puedan modificar participantes y resultados.
+2. **Triggers Automáticos**:
+   - **`on_auth_user_created`**: Al registrarse un usuario en Supabase Auth, se crea automáticamente su registro en `profiles` y se vinculan retroactivamente las invitaciones pendientes por email en `tournament_collaborators`.
+
+---
+
+## 🚀 Estado del Proyecto
+- [x] **Identidad de Marca & Branding** (Logo, Colores, Tipografías).
+- [x] **Infraestructura Supabase** (Conexión Next.js App Router, SSR, middleware de sesiones).
+- [x] **Modelo de Datos Relacional** (`001_initial_schema.sql` listo para migraciones).
+- [ ] **Autenticación UI** (Login, Registro y Estado de Sesión).
+- [ ] **Creador y Gestor de Torneos** (Formularios de configuración y generador de fixtures).
+
