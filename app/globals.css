@@ -1,26 +1,106 @@
 @import "tailwindcss";
 
+@theme {
+  --color-pitch: #22C55E;
+  --color-pitch-dark: #15803D;
+  --color-pitch-hover: #4ADE80;
+  --color-field-bg: #071A12;
+  --color-field-surface: #0D2419;
+  --color-field-card: #122D20;
+  --color-ball-white: #F4F4EE;
+  --color-text-secondary: #B9C5BD;
+  --color-field-border: #234334;
+
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-barlow-condensed), sans-serif;
+  --font-team: var(--font-barlow), sans-serif;
+  --font-score: var(--font-barlow-condensed), sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-inter: 'Inter', sans-serif;
+  --font-barlow-condensed: 'Barlow Condensed', sans-serif;
+  --font-barlow: 'Barlow', sans-serif;
+  --color-pitch: #22C55E;
+  --color-pitch-dark: #15803D;
+  --color-pitch-hover: #4ADE80;
+  --color-field-bg: #071A12;
+  --color-field-surface: #0D2419;
+  --color-field-card: #122D20;
+  --color-ball-white: #F4F4EE;
+  --color-text-secondary: #B9C5BD;
+  --color-field-border: #234334;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-field-bg);
+  color: var(--color-ball-white);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 197, 94, 0.15), transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(21, 128, 61, 0.1), transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Custom glow utility */
+.glow-pitch {
+  box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.4);
+}
+
+.glow-pitch-sm {
+  box-shadow: 0 0 15px -3px rgba(34, 197, 94, 0.25);
+}
+
+/* Glass & Card effects */
+.stadium-card {
+  background-color: #122D20;
+  border: 1px solid #234334;
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #071A12;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #234334;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #15803D;
+}
+
+/* Typography utilities */
+.font-brand {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 800;
+}
+
+.font-heading {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+}
+
+.font-team {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 600;
+}
+
+.font-score {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
 }
