@@ -29,17 +29,17 @@ El isotipo fusiona la silueta de un **balón de fútbol geométrico** integrado 
 
 Diseñada con un modo oscuro inmersivo que evoca el césped iluminado bajo los reflectores de un estadio nocturno:
 
-| Elemento | Nombre conceptual | Hex | Muestra | Uso recomendado |
-| :--- | :--- | :--- | :---: | :--- |
-| **Primario** | Verde Cancha | `#22C55E` | ![#22C55E](https://via.placeholder.com/15/22C55E/000000?text=+) | Botones de acción principal (CTA), insignias destacadas, badges de victoria |
-| **Primario Oscuro** | Campo Profundo | `#15803D` | ![#15803D](https://via.placeholder.com/15/15803D/000000?text=+) | Gradientes, sombras de acento, estados presionados |
-| **Primario Hover** | Verde Brillante | `#4ADE80` | ![#4ADE80](https://via.placeholder.com/15/4ADE80/000000?text=+) | Estados `:hover`, efectos glow, textos de énfasis |
-| **Fondo Principal** | Verde Casi Negro | `#071A12` | ![#071A12](https://via.placeholder.com/15/071A12/000000?text=+) | Background global de la aplicación (`body`) |
-| **Fondo Secundario** | Superficie Estadio | `#0D2419` | ![#0D2419](https://via.placeholder.com/15/0D2419/000000?text=+) | Header, footer, barras laterales de navegación |
-| **Contenedores / Cards** | Tarjeta Cancha | `#122D20` | ![#122D20](https://via.placeholder.com/15/122D20/000000?text=+) | Cards de partidos, tablas de posiciones, modales |
-| **Texto Principal** | Blanco Balón | `#F4F4EE` | ![#F4F4EE](https://via.placeholder.com/15/F4F4EE/000000?text=+) | Encabezados, títulos, marcadores principales |
-| **Texto Secundario** | Gris Césped | `#B9C5BD` | ![#B9C5BD](https://via.placeholder.com/15/B9C5BD/000000?text=+) | Subtítulos, estadísticas secundarias, fechas |
-| **Bordes & Líneas** | Línea de Cal | `#234334` | ![#234334](https://via.placeholder.com/15/234334/000000?text=+) | Divisores de tablas, bordes de tarjetas y tarjetas de fixture |
+| Elemento | Nombre conceptual | Hex | Uso recomendado |
+| :--- | :--- | :--- | :--- |
+| **Primario** | Verde Cancha | `#22c55e` | Botones de acción principal (CTA), insignias destacadas, badges de victoria |
+| **Primario Oscuro** | Campo Profundo | `#15803d` | Gradientes, sombras de acento, estados presionados |
+| **Primario Hover** | Verde Brillante | `#4ade80` | Estados `:hover`, efectos glow, textos de énfasis |
+| **Fondo Principal** | Verde Casi Negro | `#071a12` | Background global de la aplicación (`body`) |
+| **Fondo Secundario** | Superficie Estadio | `#0d2419` | Header, footer, barras laterales de navegación |
+| **Contenedores / Cards** | Tarjeta Cancha | `#122d20` | Cards de partidos, tablas de posiciones, modales |
+| **Texto Principal** | Blanco Balón | `#f4f4ee` | Encabezados, títulos, marcadores principales |
+| **Texto Secundario** | Gris Césped | `#b9c5bd` | Subtítulos, estadísticas secundarias, fechas |
+| **Bordes & Líneas** | Línea de Cal | `#234334` | Divisores de tablas, bordes de tarjetas y tarjetas de fixture |
 
 #### Tokens CSS (disponibles en `app/globals.css`)
 ```css
@@ -134,10 +134,23 @@ erDiagram
 
 ---
 
+## 🔐 Arquitectura de Autenticación (Supabase + Next.js 16)
+
+La autenticación combina una experiencia fluida tipo SPA dentro de la plataforma con compatibilidad total para Server Components e invitaciones externas:
+
+* **Server Components intactos**: `app/page.tsx` y `app/layout.tsx` se mantienen 100% como Server Components. El `<Header />` consulta la sesión en el servidor (`lib/supabase/server.ts`) y la inyecta al subcomponente interactivo `<AuthNav />` (`'use client'`).
+* **Modal Interactivo con Portal**: Accesible desde el header en cualquier vista (`components/auth/auth-modal.tsx`). Se monta mediante `createPortal` en `document.body` para evitar restricciones de contenedor con `backdrop-blur`.
+* **Página Dedicada (`/login`)**: Renderiza el formulario de acceso centrado para enlaces directos, invitaciones por correo a torneos o accesos externos.
+* **Sesiones y Callbacks**:
+  * `proxy.ts`: Proxy de Next.js 16 que refresca tokens y sincroniza cookies de sesión entre cliente y servidor.
+  * `/auth/callback`: Ruta API para intercambio de código PKCE tras la confirmación de correo electrónico.
+
+---
+
 ## 🚀 Estado del Proyecto
 - [x] **Identidad de Marca & Branding** (Logo, Colores, Tipografías).
-- [x] **Infraestructura Supabase** (Conexión Next.js App Router, SSR, middleware de sesiones).
+- [x] **Infraestructura Supabase** (Conexión Next.js App Router, SSR, proxy de sesiones).
 - [x] **Modelo de Datos Relacional** (`001_initial_schema.sql` listo para migraciones).
-- [ ] **Autenticación UI** (Login, Registro y Estado de Sesión).
+- [x] **Autenticación UI** (Login, Registro y Estado de Sesión).
 - [ ] **Creador y Gestor de Torneos** (Formularios de configuración y generador de fixtures).
 
